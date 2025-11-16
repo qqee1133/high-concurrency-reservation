@@ -1,7 +1,9 @@
-package com.example.reservation_system.reservation;
+package com.example.reservation_system.reservation.service;
 
-import com.example.reservation_system.product.Product;
-import com.example.reservation_system.product.ProductRepository;
+import com.example.reservation_system.product.domain.Product;
+import com.example.reservation_system.product.domain.ProductRepository;
+import com.example.reservation_system.reservation.domain.Reservation;
+import com.example.reservation_system.reservation.domain.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

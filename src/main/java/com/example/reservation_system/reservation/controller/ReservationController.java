@@ -1,7 +1,7 @@
-package com.example.reservation_system.controller;
+package com.example.reservation_system.reservation.controller;
 
-import com.example.reservation_system.dto.ReservationRequest;
-import com.example.reservation_system.reservation.ReservationService;
+import com.example.reservation_system.reservation.dto.ReservationRequest;
+import com.example.reservation_system.reservation.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

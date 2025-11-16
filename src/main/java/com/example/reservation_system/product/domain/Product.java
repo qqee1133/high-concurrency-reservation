@@ -1,4 +1,4 @@
-package com.example.reservation_system.product;
+package com.example.reservation_system.product.domain;
 
 import jakarta.persistence.*;
 import lombok.AccessLevel;

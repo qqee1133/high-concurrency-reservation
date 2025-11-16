@@ -1,6 +1,6 @@
-package com.example.reservation_system.reservation;
+package com.example.reservation_system.reservation.domain;
 
-import com.example.reservation_system.product.Product;
+import com.example.reservation_system.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

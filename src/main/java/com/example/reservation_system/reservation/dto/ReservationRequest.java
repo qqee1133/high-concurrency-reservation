@@ -1,4 +1,4 @@
-package com.example.reservation_system.dto;
+package com.example.reservation_system.reservation.dto;
 
 import lombok.AccessLevel;
 import lombok.Getter;
