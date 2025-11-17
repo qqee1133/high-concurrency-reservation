@@ -15,10 +15,10 @@ public class ReservationService {
     private final ProductRepository productRepository;
     private final ReservationRepository reservationRepository;
 
-    // 1단계 문제 증명을 위한 동시성 제어가 없는 단순 재고 차감 로직
+    // 2-1단계: 비관적 락 적용
     @Transactional
     public void reserve(Long productId, Long userId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdWithPessimisticLock(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
 
         product.decreaseStock();
