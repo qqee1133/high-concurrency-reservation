@@ -15,10 +15,10 @@ public class ReservationService {
     private final ProductRepository productRepository;
     private final ReservationRepository reservationRepository;
 
-    // 2-1단계: 비관적 락 적용
+    // 2-2단계 낙관적 락 적용
     @Transactional
     public void reserve(Long productId, Long userId) {
-        Product product = productRepository.findByIdWithPessimisticLock(productId)
+        Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("상품이 존재하지 않습니다."));
 
         product.decreaseStock();
