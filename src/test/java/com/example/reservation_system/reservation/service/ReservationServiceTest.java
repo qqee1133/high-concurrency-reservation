@@ -46,8 +46,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("[2-1단계: 비관적 락] 1000명이 동시에 100개의 재고를 예약하면, 락으로 인해 정합성이 보장된다.")
-    void pessimistic_lock_test() throws InterruptedException {
+    @DisplayName("[2-2단계: 낙관적 락] 1000명이 동시에 100개의 재고를 예약하면, 충돌로 인해 1건만 성공한다.")
+    void optimistic_lock_test() throws InterruptedException {
 
         int threadCount = 1000;
         ExecutorService executor = Executors.newFixedThreadPool(32);
@@ -83,7 +83,7 @@ class ReservationServiceTest {
         long finalStock = productRepository.findById(productId).get().getStock();
 
         System.out.println("========================================");
-        System.out.println("[2-1단계] 비관적 락(@Lock) 결과");
+        System.out.println("[2-2단계] 낙관적 락(@Version) 결과");
         System.out.println("총 수행 시간: " + stopWatch.getTotalTimeMillis() + " ms");
         System.out.println("Atomic 성공 건수: " + successCount.get());
         System.out.println("Atomic 실패 건수: " + failCount.get());
@@ -93,11 +93,11 @@ class ReservationServiceTest {
         System.out.println("========================================");
 
         assertThat(reservationCount)
-                .as("비관적 락으로 인해 100건만 예약되어야 함")
+                .as("낙관적 락으로 인해 100건만 예약되어야 함")
                 .isEqualTo(INITIAL_STOCK);
 
         assertThat(finalStock)
-                .as("비관적 락으로 인해 재고는 0이 되어야 함")
+                .as("낙관적 락으로 100건만 차감되어 재고는 0이어야 함")
                 .isEqualTo(0L);
     }
 }
