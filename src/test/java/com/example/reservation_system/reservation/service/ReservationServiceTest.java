@@ -46,12 +46,11 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("[1단계 증명] @Transactional 환경에서는 초과 예약이 발생한다.")
-    void proveRaceCondition() throws InterruptedException {
+    @DisplayName("[2-1단계: 비관적 락] 1000명이 동시에 100개의 재고를 예약하면, 락으로 인해 정합성이 보장된다.")
+    void pessimistic_lock_test() throws InterruptedException {
 
         int threadCount = 1000;
         ExecutorService executor = Executors.newFixedThreadPool(32);
-
         CountDownLatch startLatch = new CountDownLatch(1);
         CountDownLatch endLatch = new CountDownLatch(threadCount);
 
@@ -84,7 +83,7 @@ class ReservationServiceTest {
         long finalStock = productRepository.findById(productId).get().getStock();
 
         System.out.println("========================================");
-        System.out.println("[1단계] 단순 @Transactional 결과");
+        System.out.println("[2-1단계] 비관적 락(@Lock) 결과");
         System.out.println("총 수행 시간: " + stopWatch.getTotalTimeMillis() + " ms");
         System.out.println("Atomic 성공 건수: " + successCount.get());
         System.out.println("Atomic 실패 건수: " + failCount.get());
@@ -94,11 +93,11 @@ class ReservationServiceTest {
         System.out.println("========================================");
 
         assertThat(reservationCount)
-                .as("초과 예약이 발생해야 Race Condition이 증명됨 (기대: 100 초과)")
-                .isGreaterThan(INITIAL_STOCK);
+                .as("비관적 락으로 인해 100건만 예약되어야 함")
+                .isEqualTo(INITIAL_STOCK);
 
         assertThat(finalStock)
-                .as("재고가 0이 되어야 함 (단, 예약 건수는 100을 초과해야 함)")
-                .isEqualTo(0);
+                .as("비관적 락으로 인해 재고는 0이 되어야 함")
+                .isEqualTo(0L);
     }
 }
