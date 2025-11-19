@@ -21,9 +21,6 @@ public class Product {
 
     private long stock;
 
-    @Version
-    private Long version;
-
     public Product(String name, long stock) {
         this.name = name;
         this.stock = stock;
