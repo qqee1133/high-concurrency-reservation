@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ReservationServiceTest {
 
     @Autowired
-    private ReservationService reservationService;
+    private ReservationLockFacade reservationLockFacade;
 
     @Autowired
     private ProductRepository productRepository;
@@ -46,8 +46,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("[2-2단계: 낙관적 락] 1000명이 동시에 100개의 재고를 예약하면, 충돌로 인해 1건만 성공한다.")
-    void optimistic_lock_test() throws InterruptedException {
+    @DisplayName("[3단계: Redis 분산 락] 1000명이 동시에 예약하면, 락을 획득한 소수만 성공하고 나머지는 즉시 실패한다.")
+    void redis_distributed_lock_test() throws InterruptedException {
 
         int threadCount = 1000;
         ExecutorService executor = Executors.newFixedThreadPool(32);
@@ -65,7 +65,7 @@ class ReservationServiceTest {
             executor.submit(() -> {
                 try {
                     startLatch.await();
-                    reservationService.reserve(productId, userId);
+                    reservationLockFacade.reserve(productId, userId);
                     successCount.incrementAndGet();
                 } catch (Exception e) {
                     failCount.incrementAndGet();
@@ -83,7 +83,7 @@ class ReservationServiceTest {
         long finalStock = productRepository.findById(productId).get().getStock();
 
         System.out.println("========================================");
-        System.out.println("[2-2단계] 낙관적 락(@Version) 결과");
+        System.out.println("[3단계] Redis 분산 락(Simple/SETNX) 결과");
         System.out.println("총 수행 시간: " + stopWatch.getTotalTimeMillis() + " ms");
         System.out.println("Atomic 성공 건수: " + successCount.get());
         System.out.println("Atomic 실패 건수: " + failCount.get());
@@ -92,12 +92,8 @@ class ReservationServiceTest {
         System.out.println("DB 남은 재고 (stock): " + finalStock);
         System.out.println("========================================");
 
-        assertThat(reservationCount)
-                .as("낙관적 락으로 인해 100건만 예약되어야 함")
-                .isEqualTo(INITIAL_STOCK);
+        assertThat(reservationCount).isEqualTo(successCount.get());
 
-        assertThat(finalStock)
-                .as("낙관적 락으로 100건만 차감되어 재고는 0이어야 함")
-                .isEqualTo(0L);
+        assertThat(finalStock).isEqualTo(INITIAL_STOCK - successCount.get());
     }
 }
