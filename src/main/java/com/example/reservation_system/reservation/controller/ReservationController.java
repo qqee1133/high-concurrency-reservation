@@ -1,7 +1,7 @@
 package com.example.reservation_system.reservation.controller;
 
 import com.example.reservation_system.reservation.dto.ReservationRequest;
-import com.example.reservation_system.reservation.service.ReservationLockFacade;
+import com.example.reservation_system.reservation.service.ReservationQueueFacade;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class ReservationController {
 
-    private final ReservationLockFacade reservationLockFacade;
+    private final ReservationQueueFacade reservationQueueFacade;
 
     @PostMapping
     public ResponseEntity<Void> reserve(
             @RequestBody ReservationRequest request
     ) {
-        reservationLockFacade.reserve(request.getProductId(), request.getUserId());
+        reservationQueueFacade.reserve(request.getProductId(), request.getUserId());
         return ResponseEntity.ok().build();
     }
 }
