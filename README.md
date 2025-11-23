@@ -132,6 +132,7 @@ sequenceDiagram
         Worker->>DB: 4. 재고 조회 및 차감 (트랜잭션)
         DB-->>Worker: 처리 결과 (성공/실패)
     end
+```
 
 ## 5. API 명세 (최종 구현 기준)
 
