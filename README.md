@@ -6,7 +6,7 @@
 
 ### 시나리오
 -   **상품:** 재고 100개
--   **트래픽:** 10,000명의 사용자가 특정 시간(오전 10시)에 동시 접속하여 예약 요청
+-   **트래픽:** 1,000명의 사용자가 특정 시간(오전 10시)에 동시 접속하여 예약 요청
 -   **고난도 문제:** 데이터 정합성과 성능의 충돌
 
 ### 해결 과제
@@ -110,6 +110,28 @@
 -   **DB 예약 완료 건수:** 100건
 -   **DB 남은 재고:** 0
 -   **분석:** Consumer가 백그라운드에서 **순차적으로** 처리하므로, 별도의 복잡한 Lock 없이도 데이터 정합성이 완벽하게 보장됨. 시스템 안정성과 데이터 정합성을 확보하는 동시에, API 응답 대기 시간까지 획기적으로 단축한 **최적의 아키텍처**임을 확인.
+
+### 최종 아키텍처 (4단계: Redis 메시지 큐)
+
+```mermaid
+sequenceDiagram
+    actor User as 사용자 (1,000명)
+    participant API as API 서버 (Producer)
+    participant Redis as Redis (Queue)
+    participant Worker as Consumer (Scheduler)
+    participant DB as PostgreSQL
+
+    User->>API: 예약 요청 (POST /reservations)
+    Note right of User: 대규모 동시 트래픽 발생 (동시성 테스트)
+    API->>Redis: 1. 요청 적재 (LPUSH)
+    API-->>User: 2. 즉시 응답 (200 OK)
+    Note right of API: 0.22초 만에 1,000건 접수 완료
+    
+    loop 비동기 순차 처리 (Background)
+        Worker->>Redis: 3. 요청 꺼내기 (BRPOP)
+        Worker->>DB: 4. 재고 조회 및 차감 (트랜잭션)
+        DB-->>Worker: 처리 결과 (성공/실패)
+    end
 
 ## 5. API 명세 (최종 구현 기준)
 
